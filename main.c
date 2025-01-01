@@ -59,6 +59,7 @@ typedef struct{
         uint8_t * mine_counts;
 
         //Live state
+        int screen_width, screen_height;
         int total_mines;
         int won;
         enum {
@@ -153,7 +154,9 @@ static void settup(void * state_p){
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
-        state->window = glfwCreateWindow(500, 500, "sweep", NULL, NULL);
+        state->screen_width = 650;
+        state->screen_height = 650;
+        state->window = glfwCreateWindow(state->screen_width, state->screen_height, "sweep", NULL, NULL);
 
         glfwMakeContextCurrent(state->window);
 
@@ -258,7 +261,7 @@ static void update(void * state_p){
 
         double x_pos, y_pos;
         glfwGetCursorPos(state->window, &x_pos, &y_pos);
-        y_pos = 500 - y_pos;
+        y_pos = state->screen_height - y_pos;
 
         for(uint64_t i = 0; i < state->tile_points.size; ++i){
                 //TODO: check radius of point to see if it overlaps with mouse
@@ -282,7 +285,7 @@ static void update(void * state_p){
         GLuint ubo;
         glGenBuffers(state->ubo_location, &ubo);
 
-        glViewport(0, 0, 500, 500);
+        glViewport(0, 0, state->screen_width, state->screen_height);
 
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -306,11 +309,11 @@ static void update(void * state_p){
                 for(int y = 0; y < state->grid_height; ++y){
                         Vec2 offset = calculate_hexagon_offset(state->hexagon_diameter, x, y);
 
-                        float mouse_distance = sqrt(pow(x_pos - offset.x * 500 * 0.5, 2) + pow(y_pos - offset.y * 500 * 0.5,2));
-                        if(mouse_distance <= (state->hexagon_diameter * 0.5) * 500 * 0.5){
+                        float mouse_distance = sqrt(pow(x_pos - offset.x * state->screen_width * 0.5, 2) + pow(y_pos - offset.y * state->screen_height * 0.5,2));
+                        if(mouse_distance <= (state->hexagon_diameter * 0.5) * state->screen_width * 0.5){
                                 if(hoverd_x > -1 || hoverd_y > -1){
                                         Vec2 other_offset = calculate_hexagon_offset(state->hexagon_diameter, hoverd_x, hoverd_y);
-                                        float other_mouse_distance = sqrt(pow(x_pos - other_offset.x * 500 * 0.5, 2) + pow(y_pos - other_offset.y * 500 * 0.5,2));
+                                        float other_mouse_distance = sqrt(pow(x_pos - other_offset.x * state->screen_width * 0.5, 2) + pow(y_pos - other_offset.y * state->screen_height * 0.5,2));
                                         if(other_mouse_distance > mouse_distance){
                                                 hoverd_x = x;
                                                 hoverd_y = y;
